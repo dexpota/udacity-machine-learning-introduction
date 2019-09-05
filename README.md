@@ -1,7 +1,8 @@
-[miniconda-installation]: https://docs.conda.io/en/latest/miniconda.html
+[ https://github.com/JamshedVesuna/vim-markdown-preview#requireme
+ntsminiconda-installation]: https://docs.conda.io/en/latest/miniconda.html
 
 [license-cc]: http://creativecommons.org/licenses/by-nc-sa/4.0/
-[license-cc-badge]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg?style=for-the-badge
+[license-cc-badge]: https://img.shields.io/badge/License-CC%20BY--NC--SA-green.svg?style=for-the-badge
 
 [license-mit]: https://opensource.org/licenses/MIT
 [license-mit-badge]:  https://img.shields.io/github/license/dexpota/kitty-themes.svg?style=for-the-badge
@@ -11,7 +12,6 @@
 > These notes are based on the Udacity course.
 
 [![Notes licesing badge][license-cc-badge]][license-cc]
-
 [![Code licesing badge][license-mit-badge]][license-mit]
 
 ## Prerequisites
