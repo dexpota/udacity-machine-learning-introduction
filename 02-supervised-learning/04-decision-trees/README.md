@@ -5,6 +5,8 @@
 ## Snippets
 
 ```python
+from sklearn.tree import DecisionTreeClassifier
+
 model = DecisionTreeClassifier()
 model.fit(X, y)
 model.predict(x)
