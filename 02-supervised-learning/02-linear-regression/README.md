@@ -1,6 +1,6 @@
 [linear-regression]: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html
 [polynomial-features]: https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.PolynomialFeatures.html
-[laso]: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html
+[lasso]: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html
 [standard-scaler]: http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html
 
 # Linear Regression
