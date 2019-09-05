@@ -34,3 +34,7 @@ ntsminiconda-installation]: https://docs.conda.io/en/latest/miniconda.html
 
 You can find more information on how to install miniconda on your system
 [here](miniconda-installation).
+
+## TODO
+
+- Use `rundoc` to test python snippets inside markdown text;
