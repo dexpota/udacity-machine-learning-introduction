@@ -29,7 +29,7 @@ ntsminiconda-installation]: https://docs.conda.io/en/latest/miniconda.html
   ```
 3. Recreate the conda environment:
   ```bash
-
+  conda env create --name udacity-ml --file environments.yml
   ```
 
 You can find more information on how to install miniconda on your system
