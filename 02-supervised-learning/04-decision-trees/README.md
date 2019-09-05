@@ -1,3 +1,5 @@
+[decision-tree-classifier]: https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html
+
 # Decision Tree
 
 ## Snippets
@@ -18,3 +20,7 @@ min_samples_split = 15
 
 model = DecisionTreeClassifier(max_depth = 7, min_samples_leaf = 10, min_samples_split = 15)
 ```
+
+## References
+
+- [DecisionTreeClassifier][decision-tree-classifier];
