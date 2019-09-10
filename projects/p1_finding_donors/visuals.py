@@ -60,8 +60,7 @@ def evaluate(results, accuracy, f1):
     """
   
     # Create figure
-    fig, ax = pl.subplots(2, 3, figsize = (11,7))
-
+    fig, ax = pl.subplots(2, 3, figsize = (12,10))
     # Constants
     bar_width = 0.3
     colors = ['#A00000','#00A0A0','#00A000']
@@ -115,7 +114,6 @@ def evaluate(results, accuracy, f1):
     
     # Aesthetics
     pl.suptitle("Performance Metrics for Three Supervised Learning Models", fontsize = 16, y = 1.10)
-    pl.tight_layout()
     pl.show()
     
 
