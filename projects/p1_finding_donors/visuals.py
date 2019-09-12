@@ -45,8 +45,7 @@ def distribution(data, transformed = False):
             fontsize = 16, y = 1.03)
 
     fig.tight_layout()
-    fig.show()
-
+    pl.show()
 
 def evaluate(results, accuracy, f1):
     """
@@ -62,8 +61,9 @@ def evaluate(results, accuracy, f1):
     # Create figure
     fig, ax = pl.subplots(2, 3, figsize = (12,10))
     # Constants
-    bar_width = 0.3
-    colors = ['#A00000','#00A0A0','#00A000']
+    n = len(results)
+    bar_width = 1.0/n
+    colors = pl.cm.rainbow(np.linspace(0,1,n))
     
     # Super loop to plot four panels of data
     for k, learner in enumerate(results.keys()):
