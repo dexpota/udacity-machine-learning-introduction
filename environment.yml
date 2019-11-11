@@ -13,3 +13,4 @@ dependencies:
   - pytorch
   - torchvision
   - cudatoolkit=10.0
+  - docopt
