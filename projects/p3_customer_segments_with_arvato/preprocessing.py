@@ -1,5 +1,7 @@
+import pandas as pd
+import numpy as np
 from pandas.api.types import is_numeric_dtype
-from .utilities import from_string_to_list
+from utilities import from_string_to_list
 
 
 def missing_to_nan(df, info):
@@ -12,106 +14,105 @@ def missing_to_nan(df, info):
     """
     # .
 
-    # The list of special values is given as a string, convert it to a list of strings
-    info["missing_or_unknown"] = info["missing_or_unknown"].transform(from_string_to_list)
+    nan_placeholder = info["missing_or_unknown"].transform(from_string_to_list).apply(pd.Series)
+    nan_placeholder.set_index(info["attribute"], inplace=True)
 
-    for index, row in info.iterrows():
-        attribute = row["attribute"]
-        missing_or_unknown = row["missing_or_unknown"]
+    for index, row in nan_placeholder.iterrows():
+        feature_name = index
+        values = pd.to_numeric(row, errors="ignore").tolist()
+        df[feature_name].replace(to_replace=values, value=np.nan, inplace=True)
 
-        if missing_or_unknown:      
-            if is_numeric_dtype(df[attribute].dtype):
-                missing_or_unknown = list(map(int, missing_or_unknown))
-
-            df[attribute].replace(to_replace=missing_or_unknown, value=np.nan, inplace=True)
-    
     return df
 
 
 def drop_columns(df, n):
-    nan_histogram = df.isnull().sum()
-    to_be_dropped = missing_or_unknown.nlargest(n).index
-    
-    return df.drop(columns=to_be_dropped, inplace=True)
+    nan_cl_sum = df.isnull().sum().sort_values(ascending=False)
+    df.drop(columns=nan_cl_sum.nlargest(n).index, inplace=True)
+    return df
 
 
 def drop_rows(df):
-    n_columns = len(df.columns)
-    rows_selector = df.isnull().sum(axis="columns")/n_columns > 0.10
-    return df[~rows_selector]
+    threshold = .10
+    nan_row_sum = df.isnull().sum(axis="columns")
+    rows_mask = nan_row_sum / len(df.columns) > threshold
+    return df[~rows_mask]
 
 
 def dummy(df, column):
+    # Create the dummy columns and concat them to the dataframe
     df = pd.concat([df, pd.get_dummies(df[column], prefix=column)], axis=1)
 
-    # now drop the original 'country' column (you don't need it anymore)
+    # Now drop the original column in place
     df.drop([column], axis=1, inplace=True)
     return df
 
 
-def preprocess(df, info):
-    # Identify missing or unknown data values and convert them to NaNs.
-
-    df = missing_to_nan(df, info)
-    
-    df = drop_columns(df, 7):
-    
-    df = drop_rows(df)
-        
-    to_be_encoded = ["CJT_GESAMTTYP", "FINANZTYP", "LP_FAMILIE_GROB", 
-                 "LP_STATUS_GROB", "NATIONALITAET_KZ", "SHOPPER_TYP",
-                 "ZABEOTYP", "GEBAEUDETYP", "CAMEO_DEUG_2015"]
-    
-    to_be_dropped = ["GFK_URLAUBERTYP", "LP_FAMILIE_FEIN", "LP_STATUS_FEIN", "CAMEO_DEU_2015"]
-    
-    df["OST_WEST_KZ"] = df["OST_WEST_KZ"].transform(lambda x: 0 if x == 'W' else 1)
-    
-    # Drop columns
-
+def drop_all(df, to_be_dropped):
     for drop in to_be_dropped:
-        df.drop([drop], axis=1, inplace=True)
-        
-    # Encode columns
+        if drop in df.columns:
+            df.drop([drop], axis=1, inplace=True)
 
-    for encode in to_be_encoded:
-        df = dummy(azdias_processed, encode)
-        
-    
-    df["40s"] = df["PRAEGENDE_JUGENDJAHRE"].isin([1, 2]).astype(int)
-    df["50s"] = df["PRAEGENDE_JUGENDJAHRE"].isin([3, 4]).astype(int)
-    df["60s"] =  df["PRAEGENDE_JUGENDJAHRE"].isin([6, 7]).astype(int)
-    df["70s"] =  df["PRAEGENDE_JUGENDJAHRE"].isin([8, 9]).astype(int)
-    df["80s"] =  df["PRAEGENDE_JUGENDJAHRE"].isin([10, 11, 12, 13]).astype(int)
-    df["90s"] = df["PRAEGENDE_JUGENDJAHRE"].isin([14, 15]).astype(int)
 
-    df["Mainstream"] = df["PRAEGENDE_JUGENDJAHRE"].isin([1, 3, 5, 8, 10, 12, 14]).astype(int)
+def encode_mixed(df, column, rules):
+    """
+    Encode a mixed variables according to rules mapping
+    """
 
-    df["Mainstream"] = df["PRAEGENDE_JUGENDJAHRE"].isin([2, 4, 6, 7, 9, 11, 13, 15]).astype(int)
+    for key, values in rules.items():
+        df[f"{column}_{key}"] = df[column].isin(values).astype(int)
 
-    df.drop(["PRAEGENDE_JUGENDJAHRE"], axis=1, inplace=True)
-    
-    df["Wealthy"] = df["CAMEO_INTL_2015"].isin([11, 12, 13, 14, 15]).astype(int)
-    df["Prosperous"] = df["CAMEO_INTL_2015"].isin([11, 12, 13, 14, 15]).astype(int)
-    df["Comfortable"] = df["CAMEO_INTL_2015"].isin([11, 12, 13, 14, 15]).astype(int)
-    df["Less Affluent"] = df["CAMEO_INTL_2015"].isin([11, 12, 13, 14, 15]).astype(int)
-    df["Poorer"] = df["CAMEO_INTL_2015"].isin([11, 12, 13, 14, 15]).astype(int)
+    df.drop([column], axis=1, inplace=True)
+    return df
 
-    df["Pre-Family Couples & Singles"] = df["CAMEO_INTL_2015"].isin([11, 21, 31, 41, 51]).astype(int)
-    df["Young Couples With Children"] = df["CAMEO_INTL_2015"].isin([12, 22, 32, 42, 52]).astype(int)
-    df["Families With School Age Children"] = df["CAMEO_INTL_2015"].isin([13, 23, 33, 43, 53]).astype(int)
-    df["Older Families &  Mature Couples"] = df["CAMEO_INTL_2015"].isin([14, 24, 34, 44, 54]).astype(int)
-    df["Elders In Retirement"] = df["CAMEO_INTL_2015"].isin([15, 25, 35, 45, 55]).astype(int)
 
-    df.drop(["CAMEO_INTL_2015"], axis=1, inplace=True)
-    
-    df["Very good neighborhood"] = (df["WOHNLAGE"] == 1).astype(int)
-    df["Good neighborhood"] = (df["WOHNLAGE"] == 2).astype(int)
-    df["Average neighborhood"] = (df["WOHNLAGE"] == 3).astype(int)
-    df["Poor neighborhood"] = (df["WOHNLAGE"] == 4).astype(int)
-    df["Very poor neighborhood"] = (df["WOHNLAGE"] == 5).astype(int)
-    df["Rural neighborhood"] = (df["WOHNLAGE"] == 7).astype(int)
-    df["New in rural neighborhood"] = (df["WOHNLAGE"] == 8).astype(int)
+def clean_data(df, info, to_be_dropped, to_dummy_encode):
+    # Identify missing or unknown data values and convert them to NaNs.
+    df = missing_to_nan(df, info)
+    drop_all(df, to_be_dropped)
+    df = drop_rows(df)
 
-    df.drop(["CAMEO_INTL_2015"], axis=1, inplace=True)
-    
-    df.drop(["KBA05_BAUMAX", "PLZ8_BAUMAX"], axis=1, inplace=True)
+    for column in to_dummy_encode:
+        df = dummy(df, column)
+
+    if "PRAEGENDE_JUGENDJAHRE" in df.columns:
+        print("Encoding mixed variable PRAEGENDE_JUGENDJAHRE")
+        df = encode_mixed(df, "PRAEGENDE_JUGENDJAHRE", {
+            "40s": [1, 2],
+            "50s": [3, 4],
+            "60s": [6, 7],
+            "70s": [8, 9],
+            "80s": [10, 11, 12, 13],
+            "90s": [14, 15],
+            "Mainstream": [1, 3, 5, 8, 10, 12, 14]
+        })
+
+    if "CAMEO_INTL_2015" in df.columns:
+        print("Encoding mixed variable CAMEO_INTL_2015")
+
+        df = encode_mixed(df, "CAMEO_INTL_2015", {
+            "Wealthy": [11, 12, 13, 14, 15],
+            "Prosperous": [11, 12, 13, 14, 15],
+            "Comfortable": [11, 12, 13, 14, 15],
+            "Less Affluent": [11, 12, 13, 14, 15],
+            "Poorer": [11, 12, 13, 14, 15],
+            "Pre-Family Couples & Singles": [11, 21, 31, 41, 51],
+            "Young Couples With Children": [12, 22, 32, 42, 52],
+            "Families With School Age Children": [13, 23, 33, 43, 53],
+            "Older Families &  Mature Couples": [14, 24, 34, 44, 54],
+            "Elders In Retirement": [15, 25, 35, 45, 55]
+        })
+
+    if "WOHNLAGE" in df.columns:
+        print("Encoding mixed variable WOHNLAGE")
+
+        df = encode_mixed(df, "WOHNLAGE", {
+            "Very good neighborhood": [1],
+            "Good neighborhood": [2],
+            "Average neighborhood": [3],
+            "Poor neighborhood": [4],
+            "Very poor neighborhood": [5],
+            "Rural neighborhood": [7],
+            "New in rural neighborhood": [8],
+        })
+
+    return df
