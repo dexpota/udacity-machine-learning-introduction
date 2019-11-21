@@ -14,3 +14,4 @@ dependencies:
   - torchvision
   - cudatoolkit=10.0
   - docopt
+  - jupyter_contrib_nbextensions
